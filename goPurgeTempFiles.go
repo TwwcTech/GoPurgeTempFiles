@@ -96,12 +96,8 @@ func main() {
 
 	fmt.Println("\n\nPress the 'Enter' key to exit")
 	reader := bufio.NewReader(os.Stdin)
-	read, err := reader.ReadString('\n')
+	_, err := reader.ReadString('\n')
 	if err != nil {
-		return
-	}
-
-	if read == "" || read == " " {
 		return
 	}
 }
