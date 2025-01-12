@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 )
 
-func purgeDownloadsFolder() ([]string, error) {
+func purgeDownloadsFolder() error {
 	// get user's Downloads folder
 	usrHomePath, err := os.UserHomeDir()
 	if err != nil {
@@ -26,15 +27,29 @@ func purgeDownloadsFolder() ([]string, error) {
 			downloadedFiles = append(downloadedFiles, path)
 		}
 		return nil
-
 	})
+
+	var numberOfDownloadFilesRemoved []int
+	for i, files := range downloadedFiles {
+		err := os.Remove(files)
+		if err != nil {
+			_ = fmt.Errorf("%d: file in use: %q", i, files)
+			fmt.Println(err.Error())
+			continue
+		} else {
+			numberOfDownloadFilesRemoved = append(numberOfDownloadFilesRemoved, i+1)
+		}
+	}
+
 	if fileErr != nil {
 		_ = fmt.Errorf("error walking the path %q: %v", downloadsPath, fileErr)
 	}
-	return downloadedFiles, nil
+
+	fmt.Printf("number of download files removed: %d", len(numberOfDownloadFilesRemoved))
+	return nil
 }
 
-func purgeTempFiles() (int, error) {
+func purgeTempFiles() error {
 	tmpPath := os.TempDir()
 
 	var tempFiles []string
@@ -48,20 +63,50 @@ func purgeTempFiles() (int, error) {
 		return nil
 	})
 
-	var numberOfFileRemoved []int
+	var numberOfFilesRemoved []int
 	for i, file := range tempFiles {
 		err := os.Remove(file)
 		if err != nil {
-			_ = fmt.Errorf("%d: file in use: %q", i+1, file)
+			fmt.Printf("%d: %v\n", i+1, err.Error())
 			continue
 		} else {
-			numberOfFileRemoved = append(numberOfFileRemoved, i+1)
+			numberOfFilesRemoved = append(numberOfFilesRemoved, i+1)
 		}
 	}
 
-	return len(numberOfFileRemoved), tmpFileErr
+	if tmpFileErr != nil {
+		_ = fmt.Errorf("error walking the path %q: %v", tmpPath, tmpFileErr)
+	}
+
+	fmt.Printf("\nnumber of temp files removed: %d", len(numberOfFilesRemoved))
+	return nil
 }
 
 func main() {
+	fmt.Println("Go Purge Temp Files v.1.0")
+	fmt.Println("-----------------------------")
 
+	fmt.Println("\nRemoving files in the downloads folder...")
+	rmvDownloadsErr := purgeDownloadsFolder()
+	if rmvDownloadsErr != nil {
+		_ = fmt.Errorf("unable to remove files: %w", rmvDownloadsErr)
+	}
+
+	fmt.Println("\n\nRemoving temporary system files...")
+	rmvTempErr := purgeTempFiles()
+	if rmvTempErr != nil {
+		_ = fmt.Errorf("unable to remove temp files: %w", rmvTempErr)
+	}
+	fmt.Println("\n--------------------------------")
+
+	fmt.Println("\n\nPress the 'Enter' key to exit")
+	reader := bufio.NewReader(os.Stdin)
+	read, err := reader.ReadString('\n')
+	if err != nil {
+		return
+	}
+
+	if read == "" || read == " " {
+		return
+	}
 }
