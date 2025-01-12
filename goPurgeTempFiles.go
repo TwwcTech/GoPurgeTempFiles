@@ -8,24 +8,21 @@ import (
 )
 
 func purgeDownloadsFolder() error {
-	// get user's Downloads folder
 	usrHomePath, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Printf("error getting user home directory: %v", err)
 	}
 	downloadsPath := filepath.Join(usrHomePath, "Downloads")
 
-	// initialize empty slice
 	var downloadedFiles []string
-	// walk the Downloads folder
 	fileErr := filepath.Walk(downloadsPath, func(path string, fileInfo os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("error walking the path %q: %v", path, err)
 		}
 		if !fileInfo.IsDir() {
-			// if the items is not a directory append the file to the slice
 			downloadedFiles = append(downloadedFiles, path)
 		}
+
 		return nil
 	})
 
@@ -35,9 +32,8 @@ func purgeDownloadsFolder() error {
 		if err != nil {
 			fmt.Printf("%d: %v", i+1, err.Error())
 			continue
-		} else {
-			numberOfDownloadFilesRemoved = append(numberOfDownloadFilesRemoved, i+1)
 		}
+		numberOfDownloadFilesRemoved = append(numberOfDownloadFilesRemoved, i+1)
 	}
 
 	if fileErr != nil {
@@ -59,6 +55,7 @@ func purgeTempFiles() error {
 		if !d.IsDir() {
 			tempFiles = append(tempFiles, path)
 		}
+
 		return nil
 	})
 
@@ -68,9 +65,8 @@ func purgeTempFiles() error {
 		if err != nil {
 			fmt.Printf("%d: %v\n", i+1, err.Error())
 			continue
-		} else {
-			numberOfFilesRemoved = append(numberOfFilesRemoved, i+1)
 		}
+		numberOfFilesRemoved = append(numberOfFilesRemoved, i+1)
 	}
 
 	if tmpFileErr != nil {
