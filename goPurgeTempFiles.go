@@ -11,7 +11,7 @@ func purgeDownloadsFolder() error {
 	// get user's Downloads folder
 	usrHomePath, err := os.UserHomeDir()
 	if err != nil {
-		_ = fmt.Errorf("error getting user home directory: %v", err)
+		fmt.Printf("error getting user home directory: %v", err)
 	}
 	downloadsPath := filepath.Join(usrHomePath, "Downloads")
 
@@ -20,7 +20,7 @@ func purgeDownloadsFolder() error {
 	// walk the Downloads folder
 	fileErr := filepath.Walk(downloadsPath, func(path string, fileInfo os.FileInfo, err error) error {
 		if err != nil {
-			_ = fmt.Errorf("error walking the path %q: %v", path, err)
+			fmt.Printf("error walking the path %q: %v", path, err)
 		}
 		if !fileInfo.IsDir() {
 			// if the items is not a directory append the file to the slice
@@ -33,8 +33,7 @@ func purgeDownloadsFolder() error {
 	for i, files := range downloadedFiles {
 		err := os.Remove(files)
 		if err != nil {
-			_ = fmt.Errorf("%d: file in use: %q", i, files)
-			fmt.Println(err.Error())
+			fmt.Printf("%d: %v", i+1, err.Error())
 			continue
 		} else {
 			numberOfDownloadFilesRemoved = append(numberOfDownloadFilesRemoved, i+1)
@@ -42,7 +41,7 @@ func purgeDownloadsFolder() error {
 	}
 
 	if fileErr != nil {
-		_ = fmt.Errorf("error walking the path %q: %v", downloadsPath, fileErr)
+		fmt.Printf("error walking the path %q: %v", downloadsPath, fileErr)
 	}
 
 	fmt.Printf("number of download files removed: %d", len(numberOfDownloadFilesRemoved))
@@ -55,7 +54,7 @@ func purgeTempFiles() error {
 	var tempFiles []string
 	tmpFileErr := filepath.Walk(tmpPath, func(path string, d os.FileInfo, err error) error {
 		if err != nil {
-			_ = fmt.Errorf("error walking the path %q: %v", tmpPath, err)
+			fmt.Printf("error walking the path %q: %v", tmpPath, err)
 		}
 		if !d.IsDir() {
 			tempFiles = append(tempFiles, path)
@@ -75,7 +74,7 @@ func purgeTempFiles() error {
 	}
 
 	if tmpFileErr != nil {
-		_ = fmt.Errorf("error walking the path %q: %v", tmpPath, tmpFileErr)
+		fmt.Printf("error walking the path %q: %v", tmpPath, tmpFileErr)
 	}
 
 	fmt.Printf("\nnumber of temp files removed: %d", len(numberOfFilesRemoved))
